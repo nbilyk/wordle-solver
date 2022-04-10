@@ -94,30 +94,37 @@ footer {
     width: 100%;
     text-align: center;
     padding: 8px;
+    background-color: #1119;
 }
 
 /* Benchmark results */
 
+#benchmarkResultsProgressBar {
+    opacity: 0;
+    transition: opacity 0.5s, width 0.2s;
+}
+
 .progressBar {
     height: 4px;
-    background-color: #a15e26;
+    background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet, red);
 }
 
 .distributionBarContainer {
+    margin: 0 auto;
     display: flex;
     flex-direction: row;
     flex-grow: 1;
-    max-width: 400px;
-    height: 300px;
+    max-width: 200px;
+    height: 150px;
     width: 100%;
     align-items: end;
 }
 
 .distributionBar {
     width: 100%;
-    background-color: #a15e26;
-    border: thin solid rgba(0, 0, 0, 0.4);
-
+    background-color: #000000;
+    border: thin solid #333;
+    box-sizing: border-box;
 }
 
 .distributionBar:nth-child(1) {
@@ -139,5 +146,5 @@ footer {
     background-color: #940a74;
 }
 .distributionBar:nth-child(n+7) {
-    background-color: #f8053c;
+    background-color: #880000;
 }

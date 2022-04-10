@@ -48,9 +48,10 @@ export class BenchmarkComponent {
                 const height = 100 * r.distribution[i] / mostCommonCase
                 barsStr += `<div class='distributionBar' style='height: ${height}%'></div>`
             }
-
+            const pBar = el('benchmarkResultsProgressBar')
+            pBar.style.opacity = r.progress < 1 ? '100' : '0'
+            pBar.style.width = `${r.progress * 100}%`
             this.#benchmarkResults.innerHTML = `<p>
-    <div class='progressBar' style='width: ${r.progress * 100}%'></div>
     <div class='distributionBarContainer'>${barsStr}</div>
 </p>`
         })
