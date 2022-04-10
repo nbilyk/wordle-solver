@@ -3,7 +3,6 @@ import {words} from './words.js';
 import {getHints, isCorrectAnswer, shuffle} from './util.js';
 
 const MAX_GUESSES = 20
-const NUM_TRIALS = 3
 
 /**
  * @typedef BenchmarkResult
@@ -37,15 +36,13 @@ function benchmark(algorithm, options, onProgress) {
     /** @type {BenchmarkResult} */
     const result = {
         progress: 0,
-        distribution: [],
+        distribution: new Array(MAX_GUESSES),
         totalWords: 0,
         averagePerformance: 0,
         worstCase: 0,
         averageCase: 0
     }
-    for (let i = 0; i <= MAX_GUESSES; i++) {
-        result.distribution[i] = 0
-    }
+    result.distribution.fill(0)
 
     const startTime = Date.now()
     let totalGuesses = 0
