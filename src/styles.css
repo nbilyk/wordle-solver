@@ -1,0 +1,143 @@
+body {
+    background-color: #111;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
+    padding: 50px;
+    color: #c6ac99;
+    font-family: Arial,serif;
+}
+
+h1 {
+    margin-block-start: 0.1em;
+}
+
+a, a:visited, a:hover {
+    text-decoration: none;
+}
+
+a {
+    color: #a15e26;
+}
+
+a:hover {
+    color: #c56b1a;
+}
+
+#grid {
+    width: 350px;
+    height: 400px;
+    margin: auto 0;
+    display: grid;
+    align-self: center;
+    grid-template-rows: repeat(6, 1fr);
+    grid-gap: 5px;
+    padding: 10px;
+    box-sizing: border-box;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-gap: 5px;
+}
+
+.cell {
+    border: thin solid #666;
+    background-color: #1f1f1f;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    line-height: 2rem;
+    font-weight: bold;
+    vertical-align: middle;
+    box-sizing: border-box;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+.exact {
+    background-color: #0a4c0a;
+}
+
+.wrongLocation {
+    background-color: #866709;
+}
+
+.wrongLetter {
+    background-color: #561919;
+}
+
+#controls {
+    margin: 20px;
+    width: 100%;
+    border: thin solid black;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(77, 77, 77, 0.04);
+    display: flex;
+    flex-direction: column;
+}
+
+#controls > *:not(:last-child) {
+    margin-bottom: 10px;
+}
+
+footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    padding: 8px;
+}
+
+/* Benchmark results */
+
+.progressBar {
+    height: 4px;
+    background-color: #a15e26;
+}
+
+.distributionBarContainer {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    max-width: 400px;
+    height: 300px;
+    width: 100%;
+    align-items: end;
+}
+
+.distributionBar {
+    width: 100%;
+    background-color: #a15e26;
+    border: thin solid rgba(0, 0, 0, 0.4);
+
+}
+
+.distributionBar:nth-child(1) {
+    background-color: #41c504;
+}
+.distributionBar:nth-child(2) {
+    background-color: #37940a;
+}
+.distributionBar:nth-child(3) {
+    background-color: #0a947b;
+}
+.distributionBar:nth-child(4) {
+    background-color: #0a7b94;
+}
+.distributionBar:nth-child(5) {
+    background-color: #860a94;
+}
+.distributionBar:nth-child(6) {
+    background-color: #940a74;
+}
+.distributionBar:nth-child(n+7) {
+    background-color: #f8053c;
+}
