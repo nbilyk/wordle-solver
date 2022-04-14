@@ -1,4 +1,4 @@
-import {Algorithms} from './algorithms.js';
+import {Algorithms} from './algorithms/algorithms.js';
 import {words} from './words.js';
 import {getHints, isCorrectAnswer, shuffle} from './util.js';
 
@@ -18,11 +18,21 @@ const MAX_GUESSES = 20
  *   given the same inputs every time.
  */
 
-addEventListener('message', (e) => {
-    benchmark(Algorithms[e.data.algorithmId], e.data.options, (result) => {
+/**
+ * @typedef BenchmarkWorkerMessageData
+ * @property {AlgorithmConfig} config
+ */
+
+addEventListener('message', messageHandler)
+
+/**
+ * @param {MessageEvent<BenchmarkWorkerMessageData>} e
+ */
+function messageHandler(e) {
+    benchmark(Algorithms[e.data.config.algorithmId], e.data.config.options, (result) => {
         postMessage(result)
     })
-})
+}
 
 /**
  * Benchmarks the given algorithm.

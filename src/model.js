@@ -38,6 +38,13 @@ export const POSITION_HINTS = [
  */
 
 /**
+ * @typedef AlgorithmConfig
+ * @property {AlgorithmId} algorithmId
+ * @property {AlgorithmOptions} options
+ */
+
+/**
+ * Options provided to the Wordle algorithm.
  * @typedef AlgorithmOptions
  * @property {boolean} [hardMode]
  */
@@ -46,5 +53,5 @@ export const POSITION_HINTS = [
  * @typedef {Function} WordleAlgorithm
  * @param {Hint[][]} hintGrid A list of hints provided for each word.
  * @param {AlgorithmOptions} options
- * @return {string} The next word to guess.
+ * @return {string | null} The next word to guess.
  */

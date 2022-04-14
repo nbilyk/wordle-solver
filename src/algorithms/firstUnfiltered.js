@@ -6,8 +6,8 @@ import {words} from '../words.js';
  *
  * @param {Hint[][]} hintGrid
  * @param {AlgorithmOptions} options
- * @return {string}
+ * @return {string | null}
  */
 export function firstUnfiltered(hintGrid = [], options= {}) {
-    return filterWordsForHintGrid(words, hintGrid)[0]
+    return filterWordsForHintGrid(words, hintGrid)[0] || null
 }

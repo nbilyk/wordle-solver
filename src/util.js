@@ -7,7 +7,7 @@
 import {Position} from './model.js'
 
 /**
- * Filters the #words by those that could match the given hints.
+ * Filters the words by those that could match the given hints.
  *
  * @param {string[]} words
  * @param {Hint[][]} hintGrid
@@ -16,6 +16,20 @@ import {Position} from './model.js'
 export function filterWordsForHintGrid(words, hintGrid) {
     const hintGridWithCounts = hintGrid.map(hints => addCountsToHints(hints))
     return words.filter((word) => matchesEveryHint(word, hintGridWithCounts))
+}
+
+/**
+ * Filters the words by those that could match the given hints.
+ *
+ * @param {string[]} words
+ * @param {Hint[]} hints
+ * @return {string[]}
+ */
+export function filterWordsForHints(words, hints) {
+    const hintsWithCounts = addCountsToHints(hints)
+    return words.filter((word) => hintsWithCounts.every(
+        ([hint, count]) => matchesHint(word, hint, count)
+    ))
 }
 
 /**
@@ -35,7 +49,7 @@ function matchesEveryHint(word, hintGridWithCounts) {
 }
 
 /**
- * Filters the #words by those that could match the given hint.
+ * Filters the words by those that could match the given hint.
  *
  * @param {string[]} words
  * @param {Hint} hint
@@ -105,7 +119,7 @@ export function countChars(str, char) {
  * @param {Hint[]} wordHints
  * @return {HintWithCount[]}
  */
-function addCountsToHints(wordHints) {
+export function addCountsToHints(wordHints) {
     return wordHints.map((hint) => [hint, calculateN(wordHints, hint.char)])
 }
 
@@ -183,7 +197,7 @@ export function el(id) {
 }
 
 /**
- * @param {Function} inner
+ * @param {Function} inner A function that may accept parameters, but must return void.
  * @param {number} timeout
  * @return {Function} Returns a function that will invoke inner, but only after the returned
  *   function has not been called within `timeout` ms.

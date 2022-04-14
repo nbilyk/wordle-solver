@@ -1,9 +1,7 @@
 'use strict'
 
-import {Algorithms} from './algorithms.js'
 import {COLS, Position, POSITION_HINTS, ROWS} from './model.js'
 import {debounce, el} from './util.js';
-import './AlgorithmControls.js'
 import {AlgorithmControls} from './AlgorithmControls.js';
 import {BenchmarkComponent} from './BenchmarkComponent.js';
 
@@ -18,25 +16,19 @@ const PositionCss = {
 }
 
 /**
- * @typedef Settings
- * @property {AlgorithmId} algorithmId
- * @property {AlgorithmOptions} options
- */
-
-/**
  * The main solver app.
  */
 export class App {
 
     /**
-     * @type Settings
+     * @type AlgorithmConfig
      */
-    #settings = {
+    #config = Object.freeze({
         algorithmId: 'FIRST',
         options: {
             hardMode: false
         }
-    }
+    })
 
     /**
      * @type {string[]}
@@ -44,11 +36,15 @@ export class App {
     #words
 
     /**
+     * A grid of user-inputted hint positions.
+     *
      * @type {Position[][]}
      */
     #hintState
 
     /**
+     * The grid of cells.
+     *
      * @type {HTMLDivElement[][]}
      */
     #rows
@@ -63,42 +59,106 @@ export class App {
      */
     #benchmarkComponent = new BenchmarkComponent()
 
+    /**
+     * A worker for computing the next word.
+     * @type {Worker}
+     */
+    #algorithmWorker = new Worker('./algorithms/algorithmWorker.js', {
+        type: 'module'
+    })
+
     constructor() {
+        // Initialize the hint grid
         this.#hintState = []
         for (let i = 0; i < ROWS; i++) {
-            const hintStateRow = []
-            for (let j = 0; j < COLS; j++) {
-                hintStateRow.push(Position.UNKNOWN)
-            }
-            this.#hintState.push(hintStateRow)
+            this.#hintState.push(new Array(COLS))
         }
 
         /**
          * @type {string[]}
          */
-        this.#words = [this.#provideNextWord([])]
+        this.#words = []
 
         this.#initGridView();
-        this.#refreshView()
+        this.#reset()
 
         this.#algorithmControls = new AlgorithmControls()
-        this.#algorithmControls.algorithmId = this.#settings.algorithmId
         this.#algorithmControls.onChange = (algorithmId) => {
-            this.#settings.algorithmId = algorithmId
-            this.#benchmarkComponent.algorithmId = algorithmId
+            // The user has changed the selected algorithm
+            this.#updateConfig({algorithmId})
         }
-        this.#benchmarkComponent.algorithmId = this.#settings.algorithmId
-        this.#benchmarkComponent.options = this.#settings.options
+        this.#onConfigUpdated(this.#config)
     }
 
     /**
+     *
+     * @param {Partial<AlgorithmConfig>} partialConfig
+     */
+    #updateConfig(partialConfig) {
+        this.#config = Object.freeze(
+            Object.assign(
+                {},
+                this.#config,
+                partialConfig
+            )
+        )
+        this.#onConfigUpdated(this.#config)
+    }
+
+    /**
+     * A handler when the configuration has changed.
+     *
+     * @param {AlgorithmConfig} config
+     */
+    #onConfigUpdated(config) {
+        this.#benchmarkComponent.config = config
+        this.#algorithmControls.algorithmId = config.algorithmId
+        this.#reset()
+    }
+
+    #reset() {
+        this.#provideNextWord([]).then(firstWord => {
+            for (const hintStateRow of this.#hintState) {
+                hintStateRow.fill(Position.UNKNOWN)
+            }
+            this.#words.length = 0
+            if (firstWord)
+                this.#words.push(firstWord)
+            this.#refreshView()
+        }).catch((e) => {
+            console.error(e)
+        })
+    }
+
+    /**
+     * @type {Promise<string | null>}
+     */
+    #pendingNextWordPromise = Promise.resolve(null)
+
+    /**
+     * Returns a promise with the next best word to guess given the currently selected algorithm.
+     * This will wait for the previous promise to fulfill before beginning work solving with the
+     * new hint grid.
      * @param {Hint[][]} hintGrid A list of hints provided for each word.
-     * @return {string}
+     * @return {Promise<string | null>}
      */
     #provideNextWord(hintGrid) {
-        /** @type WordleAlgorithm */
-        const provideNextWord = Algorithms[this.#settings.algorithmId] || Algorithms.FIRST
-        return provideNextWord(hintGrid, this.#settings.options)
+        this.#pendingNextWordPromise = this.#pendingNextWordPromise.then(
+            () => {
+                return new Promise((resolve) => {
+                    this.#algorithmWorker.onmessage = (event) => {
+                        resolve(event.data.word)
+                    }
+
+                    this.#algorithmWorker.postMessage(/** @type AlgorithmWorkerMessageData */ {
+                        algorithmId: this.#config.algorithmId,
+                        options: this.#config.options,
+                        hintGrid,
+                    })
+                })
+            }
+        )
+        return this.#pendingNextWordPromise
     }
 
     /**
@@ -120,6 +180,7 @@ export class App {
                 row.appendChild(cell)
                 cells.push(cell)
                 cell.onclick = () => {
+                    console.log('i', i, words.length)
                     if (i >= words.length)
                         return
                     if (this.#getPreviousHint(i, j, words[i].charAt(j)) !== Position.UNKNOWN)
@@ -171,6 +232,7 @@ export class App {
      * @type {(function(): void)}
      */
     #refreshWords = debounce(this.#_refreshWords, 1000)
+
     #_refreshWords() {
         const hintState = this.#hintState
         const words = this.#words
@@ -206,8 +268,7 @@ export class App {
         }
         if (!hasHint) return
 
-        const newWord = this.#provideNextWord(hintGrid)
-        if (newWord) {
+        this.#provideNextWord(hintGrid).then(newWord => {
             words.push(newWord)
             // Pre-populate known hints for new word
             for (let col = 0; col < COLS; col++) {
@@ -216,7 +277,7 @@ export class App {
                 hintState[row][col] = this.#getPreviousHint(row, col, char)
             }
             this.#refreshView()
-        }
+        })
     }
 
     /**
@@ -237,5 +298,4 @@ export class App {
         }
         return Position.UNKNOWN
     }
-
 }
