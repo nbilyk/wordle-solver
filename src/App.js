@@ -80,7 +80,6 @@ export class App {
         this.#words = []
 
         this.#initGridView();
-        this.#reset()
 
         this.#algorithmControls = new AlgorithmControls()
         this.#algorithmControls.onChange = (algorithmId) => {
@@ -117,17 +116,11 @@ export class App {
     }
 
     #reset() {
-        this.#provideNextWord([]).then(firstWord => {
-            for (const hintStateRow of this.#hintState) {
-                hintStateRow.fill(Position.UNKNOWN)
-            }
-            this.#words.length = 0
-            if (firstWord)
-                this.#words.push(firstWord)
-            this.#refreshView()
-        }).catch((e) => {
-            console.error(e)
-        })
+        for (const hintStateRow of this.#hintState) {
+            hintStateRow.fill(Position.UNKNOWN)
+        }
+        this.#words.length = 0
+        this.#_refreshWords()
     }
 
     /**
@@ -180,7 +173,6 @@ export class App {
                 row.appendChild(cell)
                 cells.push(cell)
                 cell.onclick = () => {
-                    console.log('i', i, words.length)
                     if (i >= words.length)
                         return
                     if (this.#getPreviousHint(i, j, words[i].charAt(j)) !== Position.UNKNOWN)
@@ -254,19 +246,20 @@ export class App {
             }
             hintGrid.push(wordHints)
         }
-
-        // Check if user has entered any information that wasn't known before.
-        let hasHint = false
-        const lastRow = words.length - 1
-        for (let i = 0; i < COLS; i++) {
-            const char = words[lastRow].charAt(i)
-            const positionHint = hintState[lastRow][i]
-            if (positionHint !== this.#getPreviousHint(lastRow, i, char)) {
-                hasHint = true
-                break
+        if (words.length) {
+            // Check if user has entered any information that wasn't known before.
+            let hasHint = false
+            const lastRow = words.length - 1
+            for (let i = 0; i < COLS; i++) {
+                const char = words[lastRow].charAt(i)
+                const positionHint = hintState[lastRow][i]
+                if (positionHint !== this.#getPreviousHint(lastRow, i, char)) {
+                    hasHint = true
+                    break
+                }
             }
+            if (!hasHint) return
         }
-        if (!hasHint) return
 
         this.#provideNextWord(hintGrid).then(newWord => {
             words.push(newWord)
