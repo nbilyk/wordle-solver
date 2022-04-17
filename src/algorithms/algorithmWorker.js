@@ -4,10 +4,6 @@ import {firstUnfiltered} from './firstUnfiltered.js';
 import {tryBestPermutations} from './tryBestPermutations.js';
 
 /**
- * @typedef {'FIRST' | 'BEST_PERMUTATIONS'} AlgorithmId
- */
-
-/**
  * @enum {WordleAlgorithm}
  */
 const Algorithms = {
@@ -20,11 +16,13 @@ const Algorithms = {
  * @property {AlgorithmId} algorithmId
  * @property {Hint[][]} hintGrid
  * @property {AlgorithmOptions} options
+ * @property {number} messageId
  */
 
 /**
  * @typedef AlgorithmWorkerResponseData
  * @property {string | null} word
+ * @property {number} messageId
  */
 
 /**
@@ -34,7 +32,7 @@ const Algorithms = {
 function messageHandler(event) {
     const data = event.data
     const nextWord = Algorithms[data.algorithmId](data.hintGrid, data.options)
-    postMessage({ word: nextWord })
+    postMessage({ word: nextWord, messageId: data.messageId })
 }
 
 addEventListener('message', messageHandler)

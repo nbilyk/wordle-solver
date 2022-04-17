@@ -1,6 +1,6 @@
-import {Algorithms} from './algorithms/algorithms.js';
 import {words} from './words.js';
 import {getHints, isCorrectAnswer, shuffle} from './util.js';
+import {provideNextWord} from './algorithms/algorithm.js'
 
 const MAX_GUESSES = 20
 
@@ -19,29 +19,14 @@ const MAX_GUESSES = 20
  */
 
 /**
- * @typedef BenchmarkWorkerMessageData
- * @property {AlgorithmConfig} config
- */
-
-addEventListener('message', messageHandler)
-
-/**
- * @param {MessageEvent<BenchmarkWorkerMessageData>} e
- */
-function messageHandler(e) {
-    benchmark(Algorithms[e.data.config.algorithmId], e.data.config.options, (result) => {
-        postMessage(result)
-    })
-}
-
-/**
  * Benchmarks the given algorithm.
  *
- * @param {WordleAlgorithm} algorithm
+ * @param {AlgorithmId} algorithmId
  * @param {AlgorithmOptions} options
  * @param {function(BenchmarkResult):void} onProgress
+ * @return {Promise<BenchmarkResult>}
  */
-function benchmark(algorithm, options, onProgress) {
+export async function benchmark(algorithmId, options, onProgress) {
     const shuffledWords = shuffle(words.slice())
     /** @type {BenchmarkResult} */
     const result = {
@@ -53,6 +38,7 @@ function benchmark(algorithm, options, onProgress) {
         averageCase: 0
     }
     result.distribution.fill(0)
+    onProgress(result)
 
     const startTime = Date.now()
     let totalGuesses = 0
@@ -64,7 +50,7 @@ function benchmark(algorithm, options, onProgress) {
         const hintGrid = []
         let numGuesses = 0
         while (++numGuesses < MAX_GUESSES) {
-            const nextGuess = algorithm(hintGrid, options)
+            const nextGuess = await provideNextWord(algorithmId, hintGrid, options)
             totalGuesses++
             if (!nextGuess) {
                 // Could not find solution
@@ -86,9 +72,10 @@ function benchmark(algorithm, options, onProgress) {
             result.worstCase = numGuesses
         if (currTime - lastTime > 500) {
             lastTime = currTime
-            postMessage(result)
+            onProgress(result)
         }
     }
     result.progress = 1
-    postMessage(result)
+    onProgress(result)
+    return result
 }

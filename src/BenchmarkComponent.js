@@ -1,5 +1,6 @@
 // Benchmark
 import {el} from './util.js'
+import {benchmark as runBenchmark} from './benchmark.js'
 
 export class BenchmarkComponent {
 
@@ -13,11 +14,6 @@ export class BenchmarkComponent {
      */
     #benchmarkResults
 
-    /**
-     * @type Worker
-     */
-    #benchmarkWorker = new Worker('benchmarkWorker.js', {type: 'module'})
-
     constructor() {
 
         /**
@@ -26,17 +22,14 @@ export class BenchmarkComponent {
         this.config = null
 
         this.#benchmarkResults = el('benchmarkResults')
-        this.#benchmarkWorker.addEventListener('message', this.#messageHandler)
         el('benchmarkLink').onclick = () => this.benchmark()
     }
 
     /**
-     * @param {MessageEvent<BenchmarkResult>} event
+     * @param {BenchmarkResult} r
      */
-    #messageHandler(event) {
-        this.#isBusy = false
-        const r = event.data
-
+    #progressHandler(r) {
+        console.log('progress:', r)
         let barsStr = ''
         let mostCommonIndex = 0
         let mostCommonCase = r.distribution[0]
@@ -62,6 +55,11 @@ export class BenchmarkComponent {
         if (this.#isBusy || !this.config) return
         this.#isBusy = true
         this.#benchmarkResults.innerHTML = ``
-        this.#benchmarkWorker.postMessage({config: this.config})
+        runBenchmark(this.config.algorithmId,
+            this.config.options,
+            this.#progressHandler.bind(this)
+        ).then(() => {
+            this.#isBusy = false
+        })
     }
 }

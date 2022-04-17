@@ -4,6 +4,7 @@ import {COLS, Position, POSITION_HINTS, ROWS} from './model.js'
 import {debounce, el} from './util.js';
 import {AlgorithmControls} from './AlgorithmControls.js';
 import {BenchmarkComponent} from './BenchmarkComponent.js';
+import {provideNextWord} from './algorithms/algorithm.js'
 
 /**
  * A map of {@link Position} hint values to their respective CSS classes.
@@ -59,14 +60,6 @@ export class App {
      */
     #benchmarkComponent = new BenchmarkComponent()
 
-    /**
-     * A worker for computing the next word.
-     * @type {Worker}
-     */
-    #algorithmWorker = new Worker('./algorithms/algorithmWorker.js', {
-        type: 'module'
-    })
-
     constructor() {
         // Initialize the hint grid
         this.#hintState = []
@@ -121,37 +114,6 @@ export class App {
         }
         this.#words.length = 0
         this.#_refreshWords()
-    }
-
-    /**
-     * @type {Promise<string | null>}
-     */
-    #pendingNextWordPromise = Promise.resolve(null)
-
-    /**
-     * Returns a promise with the next best word to guess given the currently selected algorithm.
-     * This will wait for the previous promise to fulfill before beginning work solving with the
-     * new hint grid.
-     * @param {Hint[][]} hintGrid A list of hints provided for each word.
-     * @return {Promise<string | null>}
-     */
-    #provideNextWord(hintGrid) {
-        this.#pendingNextWordPromise = this.#pendingNextWordPromise.then(
-            () => {
-                return new Promise((resolve) => {
-                    this.#algorithmWorker.onmessage = (event) => {
-                        resolve(event.data.word)
-                    }
-
-                    this.#algorithmWorker.postMessage(/** @type AlgorithmWorkerMessageData */ {
-                        algorithmId: this.#config.algorithmId,
-                        options: this.#config.options,
-                        hintGrid,
-                    })
-                })
-            }
-        )
-        return this.#pendingNextWordPromise
     }
 
     /**
@@ -225,6 +187,8 @@ export class App {
      */
     #refreshWords = debounce(this.#_refreshWords, 1000)
 
+    #wordsRefreshId = 0
+
     #_refreshWords() {
         const hintState = this.#hintState
         const words = this.#words
@@ -261,7 +225,16 @@ export class App {
             if (!hasHint) return
         }
 
-        this.#provideNextWord(hintGrid).then(newWord => {
+        const currentRefreshId = ++this.#wordsRefreshId
+        provideNextWord(
+            this.#config.algorithmId,
+            hintGrid,
+            this.#config.options
+        ).then(newWord => {
+            if (currentRefreshId !== this.#wordsRefreshId)
+                return
+            if (!newWord)
+                return
             words.push(newWord)
             // Pre-populate known hints for new word
             for (let col = 0; col < COLS; col++) {
