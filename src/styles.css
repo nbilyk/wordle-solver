@@ -104,13 +104,21 @@ footer {
     transition: opacity 0.5s, width 0.2s;
 }
 
+.averageCase {
+    color: #00f7ff;
+}
+
+.worstCase {
+    color: #ff6a00;
+}
+
 .progressBar {
     height: 4px;
-    background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet, red);
+    background: linear-gradient(90deg, blue, indigo);
 }
 
 .distributionBarContainer {
-    margin: 0 auto;
+    margin: 0 auto 10px;
     display: flex;
     flex-direction: row;
     flex-grow: 1;

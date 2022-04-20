@@ -14,6 +14,8 @@ export class BenchmarkComponent {
      */
     #benchmarkResults
 
+    #numberFormatter = new Intl.NumberFormat(navigator.language, {maximumFractionDigits: 2})
+
     constructor() {
 
         /**
@@ -29,7 +31,6 @@ export class BenchmarkComponent {
      * @param {BenchmarkResult} r
      */
     #progressHandler(r) {
-        console.log('progress:', r)
         let barsStr = ''
         let mostCommonIndex = 0
         let mostCommonCase = r.distribution[0]
@@ -48,6 +49,11 @@ export class BenchmarkComponent {
         pBar.style.width = `${r.progress * 100}%`
         this.#benchmarkResults.innerHTML = `<p>
     <div class='distributionBarContainer'>${barsStr}</div>
+    <div class='averagePerformance'>
+        Average Performance: ${this.#numberFormatter.format(r.averagePerformance)}ms
+    </div>
+    <div class='averageCase'>Average Case: ${this.#numberFormatter.format(r.averageCase)}</div>
+    <div class='worstCase'>Worst Case: ${r.worstCase}</div>
 </p>`
     }
 
@@ -58,7 +64,7 @@ export class BenchmarkComponent {
         runBenchmark(this.config.algorithmId,
             this.config.options,
             this.#progressHandler.bind(this)
-        ).then(() => {
+        ).then((r) => {
             this.#isBusy = false
         })
     }
