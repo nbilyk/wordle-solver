@@ -1,5 +1,5 @@
 /**
- * @typedef {'FIRST' | 'BEST_PERMUTATIONS'} AlgorithmId
+ * @typedef {'FIRST' | 'SCORED' | 'BEST_PERMUTATIONS'} AlgorithmId
  */
 
 /**

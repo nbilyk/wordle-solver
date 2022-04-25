@@ -2,12 +2,14 @@
 
 import {firstUnfiltered} from './firstUnfiltered.js';
 import {tryBestPermutations} from './tryBestPermutations.js';
+import {provideNextWord} from './scoredLettersAlgorithm.js'
 
 /**
  * @enum {WordleAlgorithm}
  */
 const Algorithms = {
     FIRST: firstUnfiltered,
+    SCORED: provideNextWord,
     BEST_PERMUTATIONS: tryBestPermutations,
 }
 

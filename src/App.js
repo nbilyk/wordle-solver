@@ -25,7 +25,7 @@ export class App {
      * @type AlgorithmConfig
      */
     #config = Object.freeze({
-        algorithmId: 'FIRST',
+        algorithmId: 'SCORED',
         options: {
             hardMode: false
         }

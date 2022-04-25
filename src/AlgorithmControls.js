@@ -2,6 +2,11 @@ import {el} from './util.js';
 
 const algorithmOptions = [
     {
+        label: 'Scored',
+        id: 'SCORED',
+        description: `Scores each possible word based on likelihood to minimize possible answers.`
+    },
+    {
         label: 'First Unfiltered',
         id: 'FIRST',
         description: `Chooses first option that isn't excluded by the provided hints`
@@ -60,7 +65,7 @@ export class AlgorithmControls {
     /**
      * @return {NodeListOf<HTMLInputElement>}
      */
-    get #algorithmInputs() {
+    static get #algorithmInputs() {
         return /** @type NodeListOf<HTMLInputElement> */ document.querySelectorAll(
             `input[name='algorithmInput']`
         )
@@ -70,7 +75,7 @@ export class AlgorithmControls {
      * @param {AlgorithmId} value
      */
     set algorithmId(value) {
-        for (const radioButton of this.#algorithmInputs) {
+        for (const radioButton of AlgorithmControls.#algorithmInputs) {
             radioButton.checked = radioButton.value === value
         }
     }
