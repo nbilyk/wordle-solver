@@ -1,6 +1,7 @@
 import {words} from './words.js';
 import {getHints, isCorrectAnswer, shuffle} from './util.js';
 import {provideNextWord} from './algorithms/algorithm.js'
+import {ROWS} from './model.js'
 
 const MAX_GUESSES = 20
 
@@ -16,6 +17,8 @@ const MAX_GUESSES = 20
  *   found within MAX_GUESSES.
  * @property {number} averageCase The average number of guesses.
  *   given the same inputs every time.
+ * @property {{answer: string, guesses: string[]}[]} failedAnswers A list of answers and their
+ * guesses that could not be solved within 6 tries.
  */
 
 /**
@@ -35,7 +38,8 @@ export async function benchmark(algorithmId, options, onProgress) {
         totalWords: 0,
         averagePerformance: 0,
         worstCase: 0,
-        averageCase: 0
+        averageCase: 0,
+        failedAnswers: []
     }
     result.distribution.fill(0)
     onProgress(result)
@@ -46,29 +50,31 @@ export async function benchmark(algorithmId, options, onProgress) {
     for (let i = 0; i < shuffledWords.length; i++) {
         result.totalWords = i + 1
         result.progress = i / shuffledWords.length
-        const word = shuffledWords[i]
+        const answer = shuffledWords[i]
         const hintGrid = []
+        const guesses = []
         let numGuesses = 0
         while (++numGuesses < MAX_GUESSES) {
             const nextGuess = await provideNextWord(algorithmId, hintGrid, options)
-            totalGuesses++
+            guesses.push(nextGuess)
             if (!nextGuess) {
                 // Could not find solution
                 numGuesses = 0
                 break
             }
-            const hints = getHints(nextGuess, word)
+            const hints = getHints(nextGuess, answer)
             hintGrid.push(hints)
             if (isCorrectAnswer(hints))
                 break
         }
-        if (numGuesses >= MAX_GUESSES)
-            numGuesses = 0
+        totalGuesses += guesses.length
         const currTime = Date.now()
         result.averagePerformance = (currTime - startTime) / totalGuesses
         result.averageCase = totalGuesses / (i + 1)
         result.distribution[numGuesses]++
-        if (numGuesses > result.worstCase || numGuesses === 0)
+        if (numGuesses > ROWS)
+            result.failedAnswers.push({ answer, guesses })
+        if (numGuesses > result.worstCase)
             result.worstCase = numGuesses
         if (currTime - lastTime > 500) {
             lastTime = currTime

@@ -47,13 +47,35 @@ export class BenchmarkComponent {
         const pBar = el('benchmarkResultsProgressBar')
         pBar.style.opacity = r.progress < 1 ? '100' : '0'
         pBar.style.width = `${r.progress * 100}%`
+
+        let failedAnswersStr = ''
+        if (r.failedAnswers.length) {
+            let rows = ''
+            for (const failedAnswer of r.failedAnswers.slice(0, 10)) {
+                rows += `
+                    <div class='failedAnswer'>
+                        <div class='answer'>${failedAnswer.answer}</div>
+                        <div class='failedAnswerGuesses'>
+                            <div class='failedAnswerGuess'>
+                                ${failedAnswer.guesses.join(`</div><div class='failedAnswerGuess'>`)}
+                            </div>
+                        </div>
+                    </div>`
+            }
+            failedAnswersStr = `
+                <h3>Failed Answer Examples</h3>
+                <div class='failedAnswers'>${rows}</div>
+            `
+        }
+
         this.#benchmarkResults.innerHTML = `<p>
     <div class='distributionBarContainer'>${barsStr}</div>
     <div class='averagePerformance'>
         Average Performance: ${this.#numberFormatter.format(r.averagePerformance)}ms
     </div>
     <div class='averageCase'>Average Case: ${this.#numberFormatter.format(r.averageCase)}</div>
-    <div class='worstCase'>Worst Case: ${r.worstCase}</div>
+    <div class='worstCase'>Worst Case: ${r.worstCase} Guesses, ${r.failedAnswers.length} Total Failures</div>
+    ${failedAnswersStr}
 </p>`
     }
 

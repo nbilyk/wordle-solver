@@ -156,3 +156,29 @@ footer {
 .distributionBar:nth-child(n+7) {
     background-color: #880000;
 }
+
+.failedAnswers {
+    width: 500px;
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+.failedAnswer {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    border: thin solid black;
+    padding: 10px;
+}
+
+.failedAnswerGuesses {
+}
+
+.failedAnswerGuess {
+    display: inline-block;
+    border: thin solid gray;
+    background: rgba(50, 50, 50, 0.16);
+    border-radius: 8px;
+    padding: 4px;
+    margin: 4px;
+}
