@@ -18,7 +18,7 @@ const MAX_GUESSES = 20
  * @property {number} averageCase The average number of guesses.
  *   given the same inputs every time.
  * @property {{answer: string, guesses: string[]}[]} failedAnswers A list of answers and their
- * guesses that could not be solved within 6 tries.
+ *   guesses that could not be solved within 6 tries.
  */
 
 /**
@@ -72,7 +72,7 @@ export async function benchmark(algorithmId, options, onProgress) {
         result.averagePerformance = (currTime - startTime) / totalGuesses
         result.averageCase = totalGuesses / (i + 1)
         result.distribution[numGuesses]++
-        if (numGuesses > ROWS)
+        if (numGuesses > ROWS || numGuesses === 0)
             result.failedAnswers.push({ answer, guesses })
         if (numGuesses > result.worstCase)
             result.worstCase = numGuesses
