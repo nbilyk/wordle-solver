@@ -2,6 +2,11 @@ import {nonAnswerWords, words} from '../words.js'
 import {COLS, ROWS} from '../model.js'
 import {countChars, filterWordsForHintGrid} from '../util.js'
 
+// Last benchmark:
+// Average Performance: 30.78ms
+// Average Case: 3.64
+// Worst Case: 6 Guesses, 0 Total Failures
+
 const allWords = words.concat(nonAnswerWords)
 
 /**
@@ -15,7 +20,7 @@ export function provideNextWord(hintSets = [], options= {}) {
     const remainingAnswers = filterWordsForHintGrid(words, hintSets)
     if (remainingAnswers.length === 0)
         return null
-    if (remainingAnswers.length === 1)
+    if (remainingAnswers.length <= 2)
         return remainingAnswers[0]
     const remainingGuesses = ROWS - hintSets.length
     const possibleGuesses = allWords
@@ -37,7 +42,6 @@ export function provideNextWord(hintSets = [], options= {}) {
             // If the letterFrequency is 1, this character will always be hint EXACT, which
             // will not give us new information about other positions
             if (letterFrequency < 0.9999) {
-                //
                 const count = countChars(possibleGuess.substring(0, i), char)
                 if (!count) {
                     //
@@ -46,12 +50,6 @@ export function provideNextWord(hintSets = [], options= {}) {
                     }
                 }
             }
-        }
-        if (!isPossibleAnswer) {
-            //
-
-            // const p = 1 - 1 / remainingAnswers.length
-            // wordScore -= p
         }
 
         if (wordScore > bestScore) {
