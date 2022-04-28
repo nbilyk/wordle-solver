@@ -40,9 +40,11 @@ export class BenchmarkComponent {
                 mostCommonCase = r.distribution[i]
             }
         }
+        let barLabelsStr = ''
         for (let i = 1; i < r.worstCase; i++) {
             const height = 100 * r.distribution[i] / mostCommonCase
             barsStr += `<div class='distributionBar' style='height: ${height}%'></div>`
+            barLabelsStr += `<div class='distributionBarLabel'>${i + 1} (${r.distribution[i]})</div>`
         }
         const pBar = el('benchmarkResultsProgressBar')
         pBar.style.opacity = r.progress < 1 ? '100' : '0'
@@ -70,6 +72,7 @@ export class BenchmarkComponent {
 
         this.#benchmarkResults.innerHTML = `<p>
     <div class='distributionBarContainer'>${barsStr}</div>
+    <div class='distributionBarLabels'>${barLabelsStr}</div>
     <div class='averagePerformance'>
         Average Performance: ${this.#numberFormatter.format(r.averagePerformance)}ms
     </div>

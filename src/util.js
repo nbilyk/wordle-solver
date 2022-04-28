@@ -28,8 +28,26 @@ export function filterWordsForHintGrid(words, hintGrid) {
 export function filterWordsForHints(words, hints) {
     const hintsWithCounts = addCountsToHints(hints)
     return words.filter((word) => hintsWithCounts.every(
-        ([hint, count]) => matchesHint(word, hint, count)
+        (h) => matchesHint(word, h[0], h[1])
     ))
+}
+
+/**
+ * Counts the number of words that remain unfiltered after applying the given hints.
+ *
+ * @param {string[]} words
+ * @param {Hint[]} hints
+ * @returns {number}
+ */
+export function countWordsForHints(words, hints) {
+    const hintsWithCounts = addCountsToHints(hints)
+    let c = 0
+    words.filter((word) => {
+        if (hintsWithCounts.every(
+            (h) => matchesHint(word, h[0], h[1])
+        )) c++
+    })
+    return c
 }
 
 /**

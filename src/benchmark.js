@@ -53,15 +53,11 @@ export async function benchmark(algorithmId, options, onProgress) {
         const answer = shuffledWords[i]
         const hintGrid = []
         const guesses = []
-        let numGuesses = 0
-        while (++numGuesses < MAX_GUESSES) {
+        while (guesses.length < MAX_GUESSES) {
             const nextGuess = await provideNextWord(algorithmId, hintGrid, options)
+            if (!nextGuess)
+                break // Could not find solution
             guesses.push(nextGuess)
-            if (!nextGuess) {
-                // Could not find solution
-                numGuesses = 0
-                break
-            }
             const hints = getHints(nextGuess, answer)
             hintGrid.push(hints)
             if (isCorrectAnswer(hints))
@@ -71,6 +67,7 @@ export async function benchmark(algorithmId, options, onProgress) {
         const currTime = Date.now()
         result.averagePerformance = (currTime - startTime) / totalGuesses
         result.averageCase = totalGuesses / (i + 1)
+        const numGuesses = guesses.length
         result.distribution[numGuesses]++
         if (numGuesses > ROWS || numGuesses === 0)
             result.failedAnswers.push({ answer, guesses })
