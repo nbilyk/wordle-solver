@@ -1,6 +1,6 @@
 'use strict'
 
-import {filterWordsForHintGrid, filterWordsForHints, getHints} from '../util.js';
+import {countWordsForHints, filterWordsForHintGrid, getHints} from '../util.js';
 import {nonAnswerWords, words} from '../words.js';
 
 /**
@@ -11,8 +11,8 @@ import {nonAnswerWords, words} from '../words.js';
  * @return {string | null}
  */
 export function tryBestPermutations(hintSets = [], options= {}) {
-    const remainingAnswers = filterWordsForHintGrid(words, hintSets).slice(0, 100)
-    const remainingNonAnswers = nonAnswerWords.slice(0, 100)
+    const remainingAnswers = filterWordsForHintGrid(words, hintSets)
+    const remainingNonAnswers = nonAnswerWords
 
     const possibleGuesses = remainingAnswers.concat(remainingNonAnswers)
     const calculation = best(remainingAnswers, possibleGuesses)
@@ -39,46 +39,32 @@ export function tryBestPermutations(hintSets = [], options= {}) {
 function best(remainingAnswers, possibleGuesses) {
     if (remainingAnswers.length === 0)
         return null
-    if (remainingAnswers.length === 1)
+    if (remainingAnswers.length <= 2)
         return { word: remainingAnswers[0], worstCase: 0, averageCase: 0 }
     let bestGuess = /** @type AnswerCalculation | null */ null
     for (let i = 0; i < possibleGuesses.length; i++) {
         // Assume this possible guess was picked, what is the worst-case scenario
         const nextGuess = possibleGuesses[i]
-        let worstPossibility = /** @type AnswerCalculation | null */ null
-        let averageCase = 0
+        let totalUnfiltered = 0
         for (const remainingAnswer of remainingAnswers) {
             // Calculate the hints if this was the hypothetical answer
             const hints = getHints(nextGuess, remainingAnswer)
-            const subRemaining = filterWordsForHints(remainingAnswers, hints)
-            const calculation =
-                { word: nextGuess, worstCase: subRemaining.length, averageCase: 0 }
-            // const calculation = best(subRemaining, possibleGuesses, guesses.concat(nextGuess))
-            averageCase += 1 + calculation.worstCase
-            if (worstPossibility == null || calculation.worstCase > worstPossibility.worstCase)
-                worstPossibility = calculation
+            const subRemaining = countWordsForHints(remainingAnswers, hints)
+            totalUnfiltered += subRemaining
         }
-        if (!worstPossibility)
-            continue
-        averageCase /= remainingAnswers.length
+
+        const averageUnfiltered = totalUnfiltered / remainingAnswers.length
+
         if (bestGuess == null
-            || worstPossibility.worstCase < bestGuess.worstCase
-            || (worstPossibility.worstCase <= bestGuess.worstCase
-                && averageCase < bestGuess.averageCase)
+            || averageUnfiltered < bestGuess.averageCase
         ) {
+            console.log('next: ', nextGuess, averageUnfiltered)
             bestGuess = {
                 word: nextGuess,
-                worstCase: 1 + worstPossibility.worstCase,
-                averageCase
+                averageCase: averageUnfiltered
             }
         }
     }
+    console.log('returning', bestGuess)
     return bestGuess
 }
-
-/**
- * @typedef GuessCalculation
- * @property {string} word The best word to guess next. An empty string will be returned if there
- * are no #words remaining with the given hints.
- * @property {number} branchSize The size of largest possible branch guessing this word will yield.
- */
