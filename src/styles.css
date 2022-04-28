@@ -60,16 +60,16 @@ a:hover {
     user-select: none;
 }
 
-.exact {
+.correctSpot {
     background-color: #0a4c0a;
 }
 
-.wrongLocation {
+.wrongSpot {
     background-color: #866709;
 }
 
-.wrongLetter {
-    background-color: #561919;
+.noSpot {
+    background-color: #000000;
 }
 
 #controls {

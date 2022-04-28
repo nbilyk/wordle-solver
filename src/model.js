@@ -24,10 +24,9 @@ export const Position = {
  * @type {Position[]}
  */
 export const POSITION_HINTS = [
-    Position.UNKNOWN,
-    Position.CORRECT_SPOT,
-    Position.WRONG_SPOT,
     Position.NO_SPOT,
+    Position.WRONG_SPOT,
+    Position.CORRECT_SPOT,
 ]
 
 /**

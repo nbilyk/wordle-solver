@@ -1,7 +1,7 @@
 'use strict'
 
 import {COLS, Position, POSITION_HINTS, ROWS} from './model.js'
-import {debounce, el} from './util.js';
+import {debounce, el, isCorrectAnswer} from './util.js';
 import {AlgorithmControls} from './AlgorithmControls.js';
 import {BenchmarkComponent} from './BenchmarkComponent.js';
 import {provideNextWord} from './algorithms/algorithm.js'
@@ -11,9 +11,9 @@ import {provideNextWord} from './algorithms/algorithm.js'
  */
 const PositionCss = {
     [Position.UNKNOWN]: 'unknown',
-    [Position.CORRECT_SPOT]: 'exact',
-    [Position.WRONG_SPOT]: 'wrongLocation',
-    [Position.NO_SPOT]: 'wrongLetter'
+    [Position.CORRECT_SPOT]: 'correctSpot',
+    [Position.WRONG_SPOT]: 'wrongSpot',
+    [Position.NO_SPOT]: 'noSpot'
 }
 
 /**
@@ -210,6 +210,10 @@ export class App {
             }
             hintGrid.push(wordHints)
         }
+
+        if (hintGrid.length && isCorrectAnswer(hintGrid[hintGrid.length - 1]))
+            return // Already found the correct answer
+
         if (words.length) {
             // Check if user has entered any information that wasn't known before.
             let hasHint = false
@@ -240,7 +244,10 @@ export class App {
             for (let col = 0; col < COLS; col++) {
                 const char = newWord.charAt(col)
                 const row = words.length - 1
-                hintState[row][col] = this.#getPreviousHint(row, col, char)
+                const previousHint = this.#getPreviousHint(row, col, char)
+                hintState[row][col] = previousHint === Position.UNKNOWN
+                    ? Position.NO_SPOT
+                    : previousHint
             }
             this.#refreshView()
         })
