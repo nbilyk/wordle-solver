@@ -15,6 +15,10 @@ export class BenchmarkComponent {
     #benchmarkResults
 
     #numberFormatter = new Intl.NumberFormat(navigator.language, {maximumFractionDigits: 2})
+    #percentFormatter = new Intl.NumberFormat(navigator.language, {
+        style: 'percent',
+        maximumFractionDigits: 2
+    })
 
     constructor() {
 
@@ -44,7 +48,8 @@ export class BenchmarkComponent {
         for (let i = 1; i < r.worstCase; i++) {
             const height = 100 * r.distribution[i] / mostCommonCase
             barsStr += `<div class='distributionBar' style='height: ${height}%'></div>`
-            barLabelsStr += `<div class='distributionBarLabel'>${i + 1} (${r.distribution[i]})</div>`
+            const iPercent = this.#percentFormatter.format(r.distribution[i] / r.totalWords)
+            barLabelsStr += `<div class='distributionBarLabel'>${i + 1} (${iPercent})</div>`
         }
         const pBar = el('benchmarkResultsProgressBar')
         pBar.style.opacity = r.progress < 1 ? '100' : '0'
@@ -75,6 +80,9 @@ export class BenchmarkComponent {
     <div class='distributionBarLabels'>${barLabelsStr}</div>
     <div class='averagePerformance'>
         Average Performance: ${this.#numberFormatter.format(r.averagePerformance)}ms
+    </div>
+    <div class='totalWords'>
+        Total Possible Words: ${this.#numberFormatter.format(r.totalWords)}
     </div>
     <div class='averageCase'>Average Case: ${this.#numberFormatter.format(r.averageCase)}</div>
     <div class='worstCase'>Worst Case: ${r.worstCase} Guesses, ${r.failedAnswers.length} Total Failures</div>
